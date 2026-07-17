@@ -8,6 +8,7 @@ declare
   v_orders bigint;
   v_sessions bigint;
   v_history bigint;
+  v_waiter_requests bigint;
 begin
   if not public.is_admin() then
     raise exception 'Admin access required';
@@ -16,15 +17,21 @@ begin
   select count(*) into v_orders from public.orders;
   select count(*) into v_sessions from public.table_sessions;
   select count(*) into v_history from public.table_status_history;
+  select count(*) into v_waiter_requests from public.waiter_requests;
 
-  delete from public.table_sessions;
+  delete from public.waiter_requests;
   delete from public.table_status_history;
   delete from public.orders;
+  delete from public.table_sessions;
 
-  return jsonb_build_object('orders', v_orders, 'sessions', v_sessions, 'history', v_history);
+  return jsonb_build_object(
+    'orders', v_orders,
+    'sessions', v_sessions,
+    'history', v_history,
+    'waiter_requests', v_waiter_requests
+  );
 end;
 $$;
 
 revoke all on function public.staff_clear_operational_data() from public;
 grant execute on function public.staff_clear_operational_data() to authenticated;
-
