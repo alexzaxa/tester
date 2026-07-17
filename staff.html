@@ -46,17 +46,24 @@
         <div><span class="staff-live-dot"></span><strong>Ζωντανές παραγγελίες</strong><small data-last-update></small></div>
         <button data-refresh type="button">Ανανέωση</button>
       </div>
+      <section class="staff-summary" aria-label="Σύνοψη ημέρας">
+        <article><small>Έσοδα ημέρας</small><strong data-daily-income>0,00 €</strong></article>
+        <article><small>Παραδόθηκαν</small><strong data-delivered-count>0</strong></article>
+        <article><small>Σύνολο παραγγελιών</small><strong data-daily-orders>0</strong></article>
+      </section>
       <nav class="staff-tabs" aria-label="Προβολές">
         <button class="active" data-staff-tab="orders" type="button">Παραγγελίες <span data-new-count>0</span></button>
         <button data-staff-tab="tables" type="button">Τραπέζια</button>
+        <button data-staff-tab="history" type="button">Ιστορικό</button>
       </nav>
       <div data-orders-view><div class="staff-orders" data-orders></div></div>
       <div data-tables-view hidden><div class="staff-tables" data-tables></div></div>
+      <div data-history-view hidden><div class="staff-history" data-history></div></div>
     </section>
     <p class="staff-message" data-staff-message role="status" aria-live="polite"></p>
   </main>
   <audio data-new-order-sound preload="auto"><source src="data:audio/wav;base64,UklGRkQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSAAAAAA////AAAA////AAAA////AAAA////" type="audio/wav"></audio>
   <script src="js/supabase-config.js?v=20260717-2"></script>
-  <script src="js/staff.js?v=20260717-2"></script>
+  <script src="js/staff.js?v=20260717-3"></script>
 </body>
 </html>
