@@ -55,9 +55,21 @@
     if(!history.length){const empty=document.createElement('p');empty.className='staff-empty';empty.textContent='Δεν υπάρχουν αλλαγές τραπεζιών ακόμα.';host.append(empty);return;}
     history.forEach(item=>{const row=document.createElement('div');row.className='history-row';const table=document.createElement('strong');table.textContent=`Τραπέζι ${item.table_label}`;const state=document.createElement('b');state.className=item.enabled?'opened':'closed';state.textContent=item.enabled?'Άνοιξε':'Έκλεισε';const meta=document.createElement('small');meta.textContent=`${new Date(item.changed_at).toLocaleString('el-GR')} · ${item.changed_by_email||'Σύστημα'}`;row.append(table,state,meta);host.append(row);});
   }
+  async function clearAllData() {
+    if (staffRole !== 'admin') return;
+    if (!confirm('Να διαγραφούν όλες οι παραγγελίες, οι συνεδρίες και το ιστορικό τραπεζιών;')) return;
+    if (prompt('Για επιβεβαίωση γράψε ΔΙΑΓΡΑΦΗ') !== 'ΔΙΑΓΡΑΦΗ') return message('Η διαγραφή ακυρώθηκε.');
+    const button = $('[data-clear-data]'); button.disabled = true;
+    try {
+      const result = await rpc('staff_clear_operational_data');
+      seenOrders.clear();
+      await Promise.all([loadOrders(false), loadSummary(), loadTables(), loadHistory()]);
+      message(`Διαγράφηκαν ${result.orders} παραγγελίες.`);
+    } catch (e) { message(e.message); } finally { button.disabled = false; }
+  }
   async function showApp() {
     let access; try { access = await rpc('staff_check_access'); } catch (e) { await signOut(); throw new Error('Ο λογαριασμός δεν έχει πρόσβαση προσωπικού.'); }
-    staffRole=access.role; const tableTab = $('[data-staff-tab="tables"]'); const historyTab=$('[data-staff-tab="history"]'); tableTab.hidden = access.role !== 'admin'; historyTab.hidden=access.role!=='admin';
+    staffRole=access.role; const tableTab = $('[data-staff-tab="tables"]'); const historyTab=$('[data-staff-tab="history"]'); tableTab.hidden = access.role !== 'admin'; historyTab.hidden=access.role!=='admin'; $('[data-admin-danger]').hidden=access.role!=='admin';
     $('[data-login-panel]').hidden = true; $('[data-staff-app]').hidden = false; $('[data-sign-out]').hidden = false;
     await Promise.all([loadOrders(false), loadSummary(), ...(access.role==='admin'?[loadTables(),loadHistory()]:[])]); clearInterval(timer); timer = setInterval(() => Promise.all([loadOrders(),loadSummary()]).catch(e => message(e.message)), 5000);
   }
@@ -65,6 +77,7 @@
   $('[data-login-form]').addEventListener('submit', async event => { event.preventDefault(); const submit = event.submitter; submit.disabled=true; try { const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('[data-login-email]').value.trim(),password:$('[data-login-password]').value})}); saveSession(data); await showApp(); } catch(e){message(e.message);} finally{submit.disabled=false;} });
   $('[data-reset-password]').addEventListener('click',async event=>{const button=event.currentTarget;const email=$('[data-login-email]').value.trim();if(!email)return message('Γράψε πρώτα το email σου.');button.disabled=true;message('Αποστολή email…');try{await request(`/auth/v1/recover?redirect_to=${encodeURIComponent(location.href.split('#')[0])}`,{method:'POST',body:JSON.stringify({email})});message('Στάλθηκε email για δημιουργία νέου κωδικού. Έλεγξε και τα ανεπιθύμητα.');}catch(e){message(e.message);}finally{button.disabled=false;}});
   $('[data-sign-out]').addEventListener('click', signOut); $('[data-refresh]').addEventListener('click',()=>Promise.all([loadOrders(false),loadSummary(),...(staffRole==='admin'?[loadTables(),loadHistory()]:[])]).catch(e=>message(e.message)));
+  $('[data-clear-data]').addEventListener('click', clearAllData);
   $('[data-password-form]').addEventListener('submit', async event => { event.preventDefault(); const password=$('[data-new-password]').value; if(password!==$('[data-confirm-password]').value)return message('Οι κωδικοί δεν ταιριάζουν.'); const submit=event.submitter;submit.disabled=true;try{await request('/auth/v1/user',{method:'PUT',body:JSON.stringify({password})});$('[data-password-panel]').hidden=true;await showApp();message('Ο κωδικός αποθηκεύτηκε.');}catch(e){message(e.message);}finally{submit.disabled=false;} });
   document.querySelectorAll('[data-staff-tab]').forEach(button => button.addEventListener('click',()=>{ document.querySelectorAll('[data-staff-tab]').forEach(b=>b.classList.toggle('active',b===button)); $('[data-orders-view]').hidden=button.dataset.staffTab!=='orders'; $('[data-tables-view]').hidden=button.dataset.staffTab!=='tables'; $('[data-history-view]').hidden=button.dataset.staffTab!=='history'; if(button.dataset.staffTab==='history')loadHistory().catch(e=>message(e.message)); }));
   const inviteParams=new URLSearchParams(location.hash.slice(1));

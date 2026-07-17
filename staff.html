@@ -9,7 +9,7 @@
   <title>Παραγγελίες προσωπικού | More Than a Kiosk</title>
   <link rel="icon" href="assets/icons/favicon.png" type="image/png">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/staff.css?v=20260717-2">
+  <link rel="stylesheet" href="css/staff.css?v=20260717-3">
 </head>
 <body class="staff-page">
   <noscript><nav class="noscript-nav" aria-label="Βασική πλοήγηση"><a href="index.html">Αρχική</a><a href="menu.html">Κατάλογος</a></nav></noscript>
@@ -58,12 +58,19 @@
       </nav>
       <div data-orders-view><div class="staff-orders" data-orders></div></div>
       <div data-tables-view hidden><div class="staff-tables" data-tables></div></div>
-      <div data-history-view hidden><div class="staff-history" data-history></div></div>
+      <div data-history-view hidden>
+        <div class="staff-history" data-history></div>
+        <section class="staff-danger" data-admin-danger hidden>
+          <h2>Διαχείριση δεδομένων</h2>
+          <p>Η ενέργεια διαγράφει παραγγελίες, ενεργές συνεδρίες και ιστορικό τραπεζιών.</p>
+          <button data-clear-data type="button">Καθαρισμός όλων των δεδομένων</button>
+        </section>
+      </div>
     </section>
     <p class="staff-message" data-staff-message role="status" aria-live="polite"></p>
   </main>
   <audio data-new-order-sound preload="auto"><source src="data:audio/wav;base64,UklGRkQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSAAAAAA////AAAA////AAAA////AAAA////" type="audio/wav"></audio>
   <script src="js/supabase-config.js?v=20260717-2"></script>
-  <script src="js/staff.js?v=20260717-3"></script>
+  <script src="js/staff.js?v=20260717-4"></script>
 </body>
 </html>

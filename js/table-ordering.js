@@ -5,7 +5,7 @@
   const qrToken = params.get('qr');
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const state = { session: null, items: [] };
+  const state = { session: null, items: [], submittedTotal: 0 };
   const money = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' });
 
   async function rpc(name, body) {
@@ -36,16 +36,25 @@
 
   function render() {
     const host = $('[data-order-items]');
-    const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const pendingTotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = state.submittedTotal + pendingTotal;
     $('[data-cart-count]').textContent = state.items.reduce((sum, item) => sum + item.quantity, 0);
     $('[data-order-total]').textContent = money.format(total);
+    $('[data-cart-button-total]').textContent = money.format(total);
     host.replaceChildren();
     if (!state.items.length) {
-      const empty = document.createElement('p'); empty.className = 'order-empty'; empty.textContent = 'Δεν έχετε προσθέσει προϊόντα.'; host.append(empty); return;
+      const empty = document.createElement('p'); empty.className = 'order-empty';
+      empty.textContent = state.submittedTotal > 0
+        ? `Έχουν σταλεί προϊόντα αξίας ${money.format(state.submittedTotal)}. Μπορείτε να προσθέσετε κι άλλα.`
+        : 'Δεν έχετε προσθέσει προϊόντα.';
+      host.append(empty); return;
     }
     state.items.forEach((item, index) => {
       const row = document.createElement('div'); row.className = 'order-line';
-      const label = document.createElement('span'); label.textContent = item.name;
+      const label = document.createElement('span');
+      const name = document.createElement('b'); name.textContent = item.name;
+      const unitPrice = document.createElement('small'); unitPrice.textContent = `${money.format(item.price)} το ένα`;
+      label.append(name, unitPrice);
       const controls = document.createElement('div');
       const minus = document.createElement('button'); minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('aria-label', `Αφαίρεση ${item.name}`);
       const quantity = document.createElement('b'); quantity.textContent = item.quantity;
@@ -65,9 +74,11 @@
       const button = document.createElement('button'); button.type = 'button'; button.className = 'menu-add-button'; button.textContent = '+';
       button.setAttribute('aria-label', `Προσθήκη ${item.name}`);
       button.addEventListener('click', () => {
+        const wasEmpty = state.items.length === 0;
         const current = state.items.find((entry) => entry.name === item.name && entry.price === item.price);
         if (current) current.quantity += 1; else state.items.push({ ...item, quantity: 1 });
         render(); setStatus(`${item.name}: προστέθηκε.`, 'success'); window.setTimeout(() => setStatus(''), 1800);
+        if (wasEmpty) { $('[data-order-panel]').hidden = false; $('[data-order-cart-button]').setAttribute('aria-expanded', 'true'); }
       });
       row.append(button);
     });
@@ -78,7 +89,10 @@
     if (!state.items.length) return setStatus('Προσθέστε τουλάχιστον ένα προϊόν.', 'error');
     const button = $('[data-submit-order]'); button.disabled = true; button.textContent = 'Αποστολή…';
     try {
+      const submittedAmount = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
       const result = await rpc('place_table_order', { p_session_token: state.session.session_token, p_items: state.items, p_notes: $('[data-order-notes]').value.trim() || null });
+      state.submittedTotal += submittedAmount;
+      sessionStorage.setItem(`mtak-table-total-${state.session.table_label}`, String(state.submittedTotal));
       state.items = []; $('[data-order-notes]').value = ''; render();
       $('[data-order-panel]').hidden = true; $('[data-order-cart-button]').setAttribute('aria-expanded', 'false');
       setStatus(`Η παραγγελία #${result.order_number} στάλθηκε στο τραπέζι ${state.session.table_label}.`, 'success');
@@ -92,6 +106,7 @@
     setStatus('Έλεγχος QR τραπεζιού…');
     try {
       state.session = await rpc('start_table_session', { p_qr_token: qrToken });
+      state.submittedTotal = Number(sessionStorage.getItem(`mtak-table-total-${state.session.table_label}`)) || 0;
       history.replaceState(null, '', `${location.pathname}#menu`);
       setStatus(`Παραγγελία ενεργή για το τραπέζι ${state.session.table_label}.`, 'success'); enableOrdering();
     } catch (error) { setStatus(error.message, 'error'); }

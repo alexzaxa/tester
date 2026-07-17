@@ -2,6 +2,7 @@
 .table-order-status.success { background: #175d57; } .table-order-status.error { background: #923f3f; }
 .order-cart-button { position: fixed; z-index: 1650; right: 20px; bottom: calc(var(--mobile-bottom-nav-clearance) + 18px); min-height: 52px; padding: 10px 14px 10px 20px; border: 0; border-radius: 999px; color: #181610; background: var(--brand-yellow); box-shadow: 0 13px 34px rgba(0,0,0,.28); font: inherit; font-weight: 850; cursor: pointer; }
 .order-cart-button strong { display: inline-grid; min-width: 30px; min-height: 30px; margin-left: 8px; place-items: center; border-radius: 50%; color: #fff; background: #181610; }
+.order-cart-button > span { display: inline-grid; gap: 1px; text-align: left; }.order-cart-button small { font-size: .72rem; font-weight: 900; }
 .table-order-panel { position: fixed; z-index: 1800; right: 18px; bottom: 82px; width: min(420px, calc(100vw - 24px)); max-height: min(680px, calc(100svh - 110px)); overflow: auto; padding: 22px; border: 1px solid var(--line); border-radius: 25px; background: #fffdfa; box-shadow: 0 25px 70px rgba(0,0,0,.3); }
 .table-order-panel header, .table-order-panel footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .table-order-panel h2 { margin: 2px 0 0; font-size: 1.45rem; } .table-order-panel header small { color: var(--teal-700); font-weight: 850; }
@@ -9,6 +10,7 @@
 .table-order-items { margin: 20px 0; border-block: 1px solid var(--line); }
 .order-line { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); }
 .order-line:last-child { border-bottom: 0; } .order-line > div { display: flex; align-items: center; gap: 7px; }
+.order-line > span { min-width: 0; display: grid; gap: 3px; }.order-line > span b { overflow-wrap: anywhere; }.order-line > span small { color: var(--muted); font-size: .76rem; }
 .order-line button, .menu-add-button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); font: inherit; font-weight: 900; cursor: pointer; }
 .menu-price-list > li:has(.menu-add-button) { grid-template-columns: minmax(0,1fr) auto 38px; grid-template-rows: auto auto; align-items: center; column-gap: 10px; }
 .menu-price-list > li:has(.menu-add-button) > strong { grid-column: 1; grid-row: 1; }
