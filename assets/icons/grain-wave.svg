@@ -1,0 +1,8 @@
+<svg width="240" height="48" viewBox="0 0 240 48" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+  <!-- Signature motif: a wave line reading as both sea swell and wood grain, repeating tileable at 240px. -->
+  <path d="M0 24 C 20 10, 40 10, 60 24 C 80 38, 100 38, 120 24 C 140 10, 160 10, 180 24 C 200 38, 220 38, 240 24" opacity=".9"/>
+  <path d="M0 30 C 20 19, 40 19, 60 30 C 80 41, 100 41, 120 30 C 140 19, 160 19, 180 30 C 200 41, 220 41, 240 30" opacity=".45"/>
+  <path d="M0 16 C 20 8, 40 8, 60 16 C 80 24, 100 24, 120 16 C 140 8, 160 8, 180 16 C 200 24, 220 24, 240 16" opacity=".3"/>
+  <circle cx="60" cy="24" r="2.1" fill="currentColor" stroke="none" opacity=".8"/>
+  <circle cx="180" cy="24" r="2.1" fill="currentColor" stroke="none" opacity=".8"/>
+</svg>

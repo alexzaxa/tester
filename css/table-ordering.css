@@ -1,0 +1,17 @@
+.table-order-status { position: fixed; z-index: 1900; top: 86px; left: 50%; width: min(92vw, 560px); padding: 13px 18px; border-radius: 14px; color: #fff; background: #302d28; box-shadow: 0 12px 34px rgba(0,0,0,.25); transform: translateX(-50%); text-align: center; font-weight: 750; }
+.table-order-status.success { background: #175d57; } .table-order-status.error { background: #923f3f; }
+.order-cart-button { position: fixed; z-index: 1650; right: 20px; bottom: calc(var(--mobile-bottom-nav-clearance) + 18px); min-height: 52px; padding: 10px 14px 10px 20px; border: 0; border-radius: 999px; color: #181610; background: var(--brand-yellow); box-shadow: 0 13px 34px rgba(0,0,0,.28); font: inherit; font-weight: 850; cursor: pointer; }
+.order-cart-button strong { display: inline-grid; min-width: 30px; min-height: 30px; margin-left: 8px; place-items: center; border-radius: 50%; color: #fff; background: #181610; }
+.table-order-panel { position: fixed; z-index: 1800; right: 18px; bottom: 82px; width: min(420px, calc(100vw - 24px)); max-height: min(680px, calc(100svh - 110px)); overflow: auto; padding: 22px; border: 1px solid var(--line); border-radius: 25px; background: #fffdfa; box-shadow: 0 25px 70px rgba(0,0,0,.3); }
+.table-order-panel header, .table-order-panel footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.table-order-panel h2 { margin: 2px 0 0; font-size: 1.45rem; } .table-order-panel header small { color: var(--teal-700); font-weight: 850; }
+.table-order-panel header > button { width: 42px; height: 42px; border: 0; border-radius: 50%; background: #eee9df; font-size: 1.6rem; cursor: pointer; }
+.table-order-items { margin: 20px 0; border-block: 1px solid var(--line); }
+.order-line { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.order-line:last-child { border-bottom: 0; } .order-line > div { display: flex; align-items: center; gap: 7px; }
+.order-line button, .menu-add-button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); font: inherit; font-weight: 900; cursor: pointer; }
+.menu-price-list > li:has(.menu-add-button) { grid-template-columns: minmax(0,1fr) auto auto; align-items: center; }
+.menu-add-button { color: #fff; background: var(--teal-900); border-color: var(--teal-900); }
+.order-notes { display: grid; gap: 7px; font-weight: 800; } .order-notes textarea { min-height: 78px; resize: vertical; padding: 11px; border: 1px solid var(--line); border-radius: 12px; font: inherit; }
+.table-order-panel footer { margin-top: 18px; } .table-order-panel footer > strong { white-space: nowrap; } .order-empty { padding: 18px 0; color: var(--muted); text-align: center; }
+@media (max-width: 600px) { .table-order-panel { right: 8px; bottom: calc(var(--mobile-bottom-nav-clearance) + 72px); left: 8px; width: auto; padding: 18px; } .order-cart-button { right: 12px; } .table-order-panel footer { align-items: stretch; flex-direction: column; } }

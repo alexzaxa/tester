@@ -1,0 +1,380 @@
+/*
+ * More Than a Kiosk motion layer
+ * AOS 2.3.4 and Anime.js 3.2.2 are loaded from pinned jsDelivr GitHub builds.
+ * Custom artwork and motion in this file are original to this project.
+ */
+
+:root {
+  --coffee-dark: #2c211b;
+  --coffee-mid: #6d4933;
+  --coffee-light: #c18a58;
+  --logo-grey: #686461;
+  --logo-gold: #f3bd18;
+}
+
+/* AOS remains progressive enhancement: content stays visible until JS confirms it is ready. */
+html:not(.aos-ready) [data-aos] { opacity: 1 !important; transform: none !important; }
+
+/* Official logo presentation */
+.kiosk-brand > img,
+.footer-logo > img,
+.mobile-menu-brand > img,
+.loader-logo,
+.hero-logo-badge img,
+.not-found-logo {
+  object-fit: contain !important;
+  background: #fffdf8;
+}
+
+.kiosk-brand > img,
+.footer-logo > img,
+.mobile-menu-brand > img {
+  padding: 3px;
+  border: 1px solid rgba(29, 27, 23, .08);
+}
+
+.hero-logo-badge {
+  isolation: isolate;
+  overflow: visible;
+}
+
+.hero-logo-badge::before,
+.hero-logo-badge::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  z-index: -1;
+  border: 1px solid rgba(243, 189, 24, .6);
+  border-radius: 50%;
+}
+
+.hero-logo-badge::after {
+  inset: -18px;
+  border-color: rgba(255, 255, 255, .22);
+  border-style: dashed;
+}
+
+.hero-logo-badge img {
+  padding: 5px;
+}
+
+/* Branded menu hero lockup */
+.official-menu-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 22px;
+  padding: 10px 18px 10px 10px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  background: rgba(20, 18, 15, .46);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, .22);
+  backdrop-filter: blur(15px);
+}
+
+.official-menu-brand-lockup img {
+  width: 92px;
+  height: 92px;
+  padding: 4px;
+  border-radius: 50%;
+  background: #fffdf8;
+  object-fit: contain;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .28);
+}
+
+.official-menu-brand-lockup span {
+  display: grid;
+  gap: 2px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: .94;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.official-menu-brand-lockup small {
+  color: var(--logo-gold);
+  font-family: var(--font-body);
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.official-menu-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.official-menu-hero-content::after {
+  content: "";
+  position: absolute;
+  right: 2vw;
+  bottom: 48px;
+  width: clamp(150px, 21vw, 290px);
+  aspect-ratio: 1;
+  border: 2px solid rgba(243, 189, 24, .22);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 28px rgba(243, 189, 24, .05),
+    0 0 0 58px rgba(255, 255, 255, .025);
+  pointer-events: none;
+}
+
+/* Ambient coffee bean rain. The elements are injected by coffee-motion.js. */
+.coffee-bean-field {
+  position: fixed;
+  inset: 0;
+  z-index: 92;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.coffee-bean {
+  --bean-size: 16px;
+  position: absolute;
+  top: -60px;
+  left: var(--bean-left, 50%);
+  width: calc(var(--bean-size) * .72);
+  height: var(--bean-size);
+  border-radius: 58% 42% 58% 42%;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,.34), transparent 18%),
+    linear-gradient(145deg, #9a6845, #3d271c 72%);
+  box-shadow: 0 5px 10px rgba(34, 23, 17, .18);
+  opacity: var(--bean-opacity, .12);
+  transform: rotate(var(--bean-rotate, 0deg));
+  will-change: transform;
+}
+
+.coffee-bean::after {
+  content: "";
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  left: 49%;
+  width: 1px;
+  border-radius: 999px;
+  background: rgba(255, 222, 185, .52);
+  transform: rotate(17deg);
+}
+
+.coffee-bean-field.is-css-fallback .coffee-bean {
+  animation: coffeeBeanFall var(--bean-duration, 10s) linear var(--bean-delay, 0s) infinite;
+}
+
+/* Coffee steam detail above the coffee menu panel */
+.coffee-steam {
+  position: absolute;
+  z-index: 4;
+  right: clamp(24px, 7vw, 100px);
+  bottom: 64px;
+  width: 92px;
+  height: 120px;
+  pointer-events: none;
+}
+
+.coffee-steam span {
+  position: absolute;
+  bottom: 0;
+  width: 14px;
+  height: 86px;
+  border: 3px solid rgba(255, 255, 255, .42);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  filter: blur(.2px);
+  opacity: 0;
+  animation: steamRise 3.2s ease-in-out infinite;
+}
+
+.coffee-steam span:nth-child(1) { left: 8px; animation-delay: 0s; }
+.coffee-steam span:nth-child(2) { left: 37px; height: 102px; animation-delay: .7s; }
+.coffee-steam span:nth-child(3) { left: 66px; height: 76px; animation-delay: 1.35s; }
+
+/* Menu panels receive category-specific detail colors */
+.catalog-panel {
+  --panel-accent: var(--logo-gold);
+  position: relative;
+  isolation: isolate;
+}
+
+.catalog-panel[data-menu-theme="coffee"] { --panel-accent: #f2b62d; }
+.catalog-panel[data-menu-theme="beverages"] { --panel-accent: #2f96a8; }
+.catalog-panel[data-menu-theme="cocktails"] { --panel-accent: #e9652f; }
+.catalog-panel[data-menu-theme="refreshments"] { --panel-accent: #79ad55; }
+.catalog-panel[data-menu-theme="spirits"] { --panel-accent: #c58a43; }
+
+.catalog-panel::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: -88px;
+  top: 285px;
+  width: 210px;
+  height: 210px;
+  border: 1px solid color-mix(in srgb, var(--panel-accent) 38%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 28px color-mix(in srgb, var(--panel-accent) 7%, transparent),
+    0 0 0 58px color-mix(in srgb, var(--panel-accent) 4%, transparent);
+  pointer-events: none;
+}
+
+.catalog-panel-title p,
+.catalog-group-heading span {
+  color: var(--panel-accent);
+}
+
+.catalog-panel-title span {
+  border-color: color-mix(in srgb, var(--panel-accent) 70%, white 20%);
+  box-shadow: 0 0 0 7px color-mix(in srgb, var(--panel-accent) 13%, transparent);
+}
+
+.catalog-panel-head::after {
+  content: "";
+  position: absolute;
+  right: 30px;
+  top: 28px;
+  width: 96px;
+  height: 96px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 16px rgba(255, 255, 255, .04);
+  pointer-events: none;
+}
+
+.catalog-group {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--panel-accent) 8%, transparent), transparent 32%),
+    #fffdfa;
+}
+
+.catalog-group::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--panel-accent), transparent 72%);
+  opacity: .86;
+}
+
+.menu-price-list > li {
+  position: relative;
+  margin-inline: -8px;
+  padding-inline: 8px;
+  border-radius: 10px;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.menu-price-list > li > span {
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--panel-accent) 17%, rgba(29,27,23,.08));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel-accent) 8%, white);
+}
+
+@media (hover: hover) {
+  .menu-price-list > li:hover {
+    background: color-mix(in srgb, var(--panel-accent) 7%, transparent);
+    transform: translateX(3px);
+  }
+}
+
+.menu-mini-note {
+  border: 1px solid color-mix(in srgb, var(--panel-accent) 16%, transparent);
+}
+
+/* Subtle shine and spring details */
+.primary-button,
+.secondary-button,
+.kiosk-category-card,
+.catalog-group,
+.hero-logo-badge,
+.official-menu-brand-lockup {
+  transform-style: preserve-3d;
+}
+
+.primary-button { position: relative; overflow: hidden; }
+
+.primary-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.22) 45%, transparent 68%);
+  transform: translateX(-140%);
+  transition: transform .7s ease;
+  pointer-events: none;
+}
+
+.primary-button:hover::after { transform: translateX(140%); }
+
+.menu-category-nav a {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-category-nav a::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--logo-gold);
+  transform: scaleX(0);
+  transition: transform .25s ease;
+}
+
+.menu-category-nav a:hover::after,
+.menu-category-nav a.active::after { transform: scaleX(1); }
+
+body.motion-enhanced .motion-stagger-item {
+  will-change: opacity, transform;
+}
+
+@keyframes steamRise {
+  0% { opacity: 0; transform: translate3d(0, 12px, 0) scale(.8) rotate(4deg); }
+  28% { opacity: .7; }
+  72% { opacity: .3; }
+  100% { opacity: 0; transform: translate3d(4px, -38px, 0) scale(1.1) rotate(-7deg); }
+}
+
+@keyframes coffeeBeanFall {
+  from { transform: translate3d(0, -14vh, 0) rotate(0deg); }
+  to { transform: translate3d(var(--bean-drift, 24px), 118vh, 0) rotate(540deg); }
+}
+
+@media (max-width: 760px) {
+  .official-menu-brand-lockup {
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 7px 14px 7px 7px;
+  }
+
+  .official-menu-brand-lockup img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .official-menu-brand-lockup span { font-size: 1.25rem; }
+  .official-menu-brand-lockup small { font-size: .54rem; }
+  .official-menu-hero-content::after { display: none; }
+  .coffee-steam { right: 18px; bottom: 38px; transform: scale(.72); transform-origin: bottom right; }
+  .catalog-panel::before { width: 150px; height: 150px; right: -88px; top: 230px; }
+  .catalog-panel-head::after { width: 72px; height: 72px; right: 18px; top: 18px; }
+  .coffee-bean { opacity: min(var(--bean-opacity, .1), .09); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coffee-bean-field,
+  .coffee-steam { display: none !important; }
+  .hero-logo-badge::after { display: none; }
+  [data-aos] { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
