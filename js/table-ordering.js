@@ -26,6 +26,13 @@
     host.textContent = message;
   }
 
+  function setPanel(open) {
+    $('[data-order-panel]').hidden = !open;
+    $('[data-order-backdrop]').hidden = !open;
+    $('[data-order-cart-button]').setAttribute('aria-expanded', String(open));
+    document.documentElement.classList.toggle('order-panel-open', open);
+  }
+
   function parseItem(row) {
     const name = $('strong', row)?.textContent.trim();
     const priceText = $(':scope > span', row)?.textContent.trim() || '';
@@ -41,6 +48,10 @@
     $('[data-cart-count]').textContent = state.items.reduce((sum, item) => sum + item.quantity, 0);
     $('[data-order-total]').textContent = money.format(total);
     $('[data-cart-button-total]').textContent = money.format(total);
+    $('[data-submitted-total]').textContent = money.format(state.submittedTotal);
+    $('[data-pending-total]').textContent = money.format(pendingTotal);
+    $('[data-clear-order]').disabled = !state.items.length;
+    $('[data-submit-order]').disabled = !state.items.length;
     host.replaceChildren();
     if (!state.items.length) {
       const empty = document.createElement('p'); empty.className = 'order-empty';
@@ -78,7 +89,9 @@
         const current = state.items.find((entry) => entry.name === item.name && entry.price === item.price);
         if (current) current.quantity += 1; else state.items.push({ ...item, quantity: 1 });
         render(); setStatus(`${item.name}: προστέθηκε.`, 'success'); window.setTimeout(() => setStatus(''), 1800);
-        if (wasEmpty) { $('[data-order-panel]').hidden = false; $('[data-order-cart-button]').setAttribute('aria-expanded', 'true'); }
+        button.classList.remove('just-added'); void button.offsetWidth; button.classList.add('just-added');
+        $('[data-order-cart-button]').classList.remove('cart-bump'); void $('[data-order-cart-button]').offsetWidth; $('[data-order-cart-button]').classList.add('cart-bump');
+        if (wasEmpty) setPanel(true);
       });
       row.append(button);
     });
@@ -94,10 +107,10 @@
       state.submittedTotal += submittedAmount;
       sessionStorage.setItem(`mtak-table-total-${state.session.table_label}`, String(state.submittedTotal));
       state.items = []; $('[data-order-notes]').value = ''; render();
-      $('[data-order-panel]').hidden = true; $('[data-order-cart-button]').setAttribute('aria-expanded', 'false');
+      setPanel(false);
       setStatus(`Η παραγγελία #${result.order_number} στάλθηκε στο τραπέζι ${state.session.table_label}.`, 'success');
     } catch (error) { setStatus(error.message, 'error'); }
-    finally { button.disabled = false; button.textContent = 'Αποστολή παραγγελίας'; }
+    finally { button.disabled = !state.items.length; button.textContent = 'Αποστολή παραγγελίας'; }
   }
 
   async function init() {
@@ -112,8 +125,11 @@
     } catch (error) { setStatus(error.message, 'error'); }
   }
 
-  $('[data-order-cart-button]')?.addEventListener('click', () => { const panel = $('[data-order-panel]'); panel.hidden = !panel.hidden; $('[data-order-cart-button]').setAttribute('aria-expanded', String(!panel.hidden)); });
-  $('[data-close-order]')?.addEventListener('click', () => { $('[data-order-panel]').hidden = true; $('[data-order-cart-button]').setAttribute('aria-expanded', 'false'); });
+  $('[data-order-cart-button]')?.addEventListener('click', () => setPanel($('[data-order-panel]').hidden));
+  $('[data-close-order]')?.addEventListener('click', () => setPanel(false));
+  $('[data-order-backdrop]')?.addEventListener('click', () => setPanel(false));
+  $('[data-clear-order]')?.addEventListener('click', () => { if (!state.items.length || !confirm('Να αφαιρεθούν όλα τα νέα προϊόντα;')) return; state.items = []; render(); });
   $('[data-submit-order]')?.addEventListener('click', submit);
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('[data-order-panel]').hidden) setPanel(false); });
   document.addEventListener('DOMContentLoaded', init);
 })();
