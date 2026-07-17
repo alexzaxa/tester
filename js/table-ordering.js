@@ -5,7 +5,7 @@
   const qrToken = params.get('qr');
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const state = { session: null, items: [], submittedTotal: 0 };
+  const state = { session: null, items: [], submittedTotal: 0, orders: [], poller: 0 };
   const money = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' });
 
   async function rpc(name, body) {
@@ -41,6 +41,37 @@
     return { name, price: Number(match[0]) };
   }
 
+  const statusLabels = { new: 'Ελήφθη', preparing: 'Ετοιμάζεται', ready: 'Έτοιμη', delivered: 'Παραδόθηκε', cancelled: 'Ακυρώθηκε' };
+  function renderOrderHistory() {
+    const host = $('[data-customer-orders]'); host.replaceChildren(); host.hidden = !state.orders.length;
+    state.orders.forEach(order => {
+      const row = document.createElement('article'); row.className = 'customer-order-round';
+      const head = document.createElement('div');
+      const title = document.createElement('strong'); title.textContent = `Παραγγελία #${order.order_number}`;
+      const status = document.createElement('span'); status.className = `customer-order-status ${order.status}`; status.textContent = statusLabels[order.status] || order.status;
+      const items = document.createElement('small'); items.textContent = (order.items || []).map(item => `${item.quantity}× ${item.name}`).join(' · ');
+      const total = document.createElement('b'); total.textContent = money.format(Number(order.total));
+      head.append(title, status); row.append(head, items, total); host.append(row);
+    });
+  }
+
+  async function refreshSession() {
+    if (!state.session?.session_token) return;
+    const summary = await rpc('customer_session_summary', { p_session_token: state.session.session_token });
+    state.session = { ...state.session, ...summary }; state.orders = summary.orders || [];
+    state.submittedTotal = state.orders.filter(o => o.status !== 'cancelled').reduce((sum,o) => sum + Number(o.total), 0);
+    renderOrderHistory(); render();
+  }
+
+  async function addCustomerTools() {
+    const popular = await rpc('customer_popular_items', {}).catch(() => []);
+    const popularNames = new Set(popular.slice(0, 6).map(item => item.name));
+    $$('.menu-price-list > li').forEach(row => { const item=parseItem(row); if(item && popularNames.has(item.name)){ const badge=document.createElement('em'); badge.className='popular-badge'; badge.textContent='Δημοφιλές'; row.append(badge); } });
+    const intro = $('.official-menu-intro'); if (!intro || $('[data-menu-search]')) return;
+    const search = document.createElement('label'); search.className='customer-menu-search'; search.innerHTML='<span>Αναζήτηση στον κατάλογο</span><input data-menu-search type="search" placeholder="Καφές, cocktail, αναψυκτικό…">'; intro.after(search);
+    $('input',search).addEventListener('input', event => { const term=event.target.value.trim().toLocaleLowerCase('el'); $$('.menu-price-list > li').forEach(row => { row.hidden=Boolean(term)&&!row.textContent.toLocaleLowerCase('el').includes(term); }); });
+  }
+
   function render() {
     const host = $('[data-order-items]');
     const pendingTotal = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -52,6 +83,7 @@
     $('[data-pending-total]').textContent = money.format(pendingTotal);
     $('[data-clear-order]').disabled = !state.items.length;
     $('[data-submit-order]').disabled = !state.items.length;
+    renderOrderHistory();
     host.replaceChildren();
     if (!state.items.length) {
       const empty = document.createElement('p'); empty.className = 'order-empty';
@@ -105,10 +137,10 @@
       const submittedAmount = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
       const result = await rpc('place_table_order', { p_session_token: state.session.session_token, p_items: state.items, p_notes: $('[data-order-notes]').value.trim() || null });
       state.submittedTotal += submittedAmount;
-      sessionStorage.setItem(`mtak-table-total-${state.session.table_label}`, String(state.submittedTotal));
       state.items = []; $('[data-order-notes]').value = ''; render();
       setPanel(false);
       setStatus(`Η παραγγελία #${result.order_number} στάλθηκε στο τραπέζι ${state.session.table_label}.`, 'success');
+      await refreshSession().catch(() => {});
     } catch (error) { setStatus(error.message, 'error'); }
     finally { button.disabled = !state.items.length; button.textContent = 'Αποστολή παραγγελίας'; }
   }
@@ -118,10 +150,15 @@
     if (!config.url || !config.anonKey) return setStatus('Η παραγγελία τραπεζιού δεν έχει ακόμη συνδεθεί με τον διακομιστή.', 'error');
     setStatus('Έλεγχος QR τραπεζιού…');
     try {
-      state.session = await rpc('start_table_session', { p_qr_token: qrToken });
-      state.submittedTotal = Number(sessionStorage.getItem(`mtak-table-total-${state.session.table_label}`)) || 0;
+      const storageKey = `mtak-session-${qrToken.slice(0,12)}`;
+      const savedToken = sessionStorage.getItem(storageKey);
+      if (savedToken) state.session = await rpc('customer_session_summary', { p_session_token: savedToken }).catch(() => null);
+      if (!state.session) { state.session = await rpc('start_table_session', { p_qr_token: qrToken }); sessionStorage.setItem(storageKey, state.session.session_token); }
+      state.orders = state.session.orders || [];
+      state.submittedTotal = state.orders.filter(o => o.status !== 'cancelled').reduce((sum,o) => sum + Number(o.total), 0);
       history.replaceState(null, '', `${location.pathname}#menu`);
-      setStatus(`Παραγγελία ενεργή για το τραπέζι ${state.session.table_label}.`, 'success'); enableOrdering();
+      setStatus(`Παραγγελία ενεργή για το τραπέζι ${state.session.table_label}.`, 'success'); enableOrdering(); await addCustomerTools();
+      clearInterval(state.poller); state.poller = setInterval(() => refreshSession().catch(() => {}), 7000);
     } catch (error) { setStatus(error.message, 'error'); }
   }
 
@@ -129,6 +166,7 @@
   $('[data-close-order]')?.addEventListener('click', () => setPanel(false));
   $('[data-order-backdrop]')?.addEventListener('click', () => setPanel(false));
   $('[data-clear-order]')?.addEventListener('click', () => { if (!state.items.length || !confirm('Να αφαιρεθούν όλα τα νέα προϊόντα;')) return; state.items = []; render(); });
+  $('[data-call-waiter]')?.addEventListener('click', async event => { const button=event.currentTarget; button.disabled=true; try { await rpc('call_waiter',{p_session_token:state.session.session_token}); setStatus('Ειδοποιήσαμε τον σερβιτόρο.', 'success'); } catch(error){setStatus(error.message,'error');} finally { setTimeout(()=>button.disabled=false,5000); } });
   $('[data-submit-order]')?.addEventListener('click', submit);
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('[data-order-panel]').hidden) setPanel(false); });
   document.addEventListener('DOMContentLoaded', init);

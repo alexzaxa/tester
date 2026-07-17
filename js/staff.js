@@ -43,6 +43,10 @@
     else orders.forEach(o => host.append(orderCard(o)));
     $('[data-last-update]').textContent = `Ενημέρωση ${new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
   }
+  async function loadWaiterRequests() {
+    const requests=await rpc('staff_list_waiter_requests'); const host=$('[data-waiter-alerts]'); host.replaceChildren(); host.hidden=!requests.length;
+    requests.forEach(request=>{const row=document.createElement('div');const text=document.createElement('strong');text.textContent=`🔔 Το τραπέζι ${request.table_label} καλεί σερβιτόρο`;const button=document.createElement('button');button.type='button';button.textContent='Το ανέλαβα';button.addEventListener('click',async()=>{button.disabled=true;try{await rpc('staff_close_waiter_request',{p_id:request.id});await loadWaiterRequests();}catch(e){message(e.message);button.disabled=false;}});row.append(text,button);host.append(row);});
+  }
   async function loadTables() {
     const tables = await rpc('staff_list_tables'); const host = $('[data-tables]'); host.replaceChildren();
     tables.forEach(table => { const row = document.createElement('div'); row.className = 'staff-table'; const label = document.createElement('strong'); label.textContent = `Τραπέζι ${table.label}`; const button = document.createElement('button'); button.type = 'button'; button.className = table.enabled ? '' : 'off'; button.textContent = table.enabled ? 'Ενεργό' : 'Κλειστό'; button.addEventListener('click', async () => { button.disabled = true; try { await rpc('staff_set_table_enabled',{p_table_id:table.id,p_enabled:!table.enabled}); await loadTables(); } catch(e){message(e.message);} }); row.append(label,button); host.append(row); });
@@ -71,7 +75,7 @@
     let access; try { access = await rpc('staff_check_access'); } catch (e) { await signOut(); throw new Error('Ο λογαριασμός δεν έχει πρόσβαση προσωπικού.'); }
     staffRole=access.role; const tableTab = $('[data-staff-tab="tables"]'); const historyTab=$('[data-staff-tab="history"]'); tableTab.hidden = access.role !== 'admin'; historyTab.hidden=access.role!=='admin'; $('[data-admin-danger]').hidden=access.role!=='admin';
     $('[data-login-panel]').hidden = true; $('[data-staff-app]').hidden = false; $('[data-sign-out]').hidden = false;
-    await Promise.all([loadOrders(false), loadSummary(), ...(access.role==='admin'?[loadTables(),loadHistory()]:[])]); clearInterval(timer); timer = setInterval(() => Promise.all([loadOrders(),loadSummary()]).catch(e => message(e.message)), 5000);
+    await Promise.all([loadOrders(false),loadWaiterRequests(),loadSummary(), ...(access.role==='admin'?[loadTables(),loadHistory()]:[])]); clearInterval(timer); timer = setInterval(() => Promise.all([loadOrders(),loadWaiterRequests(),loadSummary()]).catch(e => message(e.message)), 5000);
   }
   async function signOut() { clearInterval(timer); if (session?.access_token) request('/auth/v1/logout',{method:'POST'}).catch(()=>{}); saveSession(null); $('[data-login-panel]').hidden=false; $('[data-staff-app]').hidden=true; $('[data-sign-out]').hidden=true; }
   $('[data-login-form]').addEventListener('submit', async event => { event.preventDefault(); const submit = event.submitter; submit.disabled=true; try { const data=await request('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:$('[data-login-email]').value.trim(),password:$('[data-login-password]').value})}); saveSession(data); await showApp(); } catch(e){message(e.message);} finally{submit.disabled=false;} });
