@@ -30,7 +30,7 @@
     const name = $('strong', row)?.textContent.trim();
     const priceText = $(':scope > span', row)?.textContent.trim() || '';
     const match = priceText.replace(',', '.').match(/\d+(?:\.\d{1,2})?/);
-    if (!name || !match || row.classList.contains('menu-item-extra')) return null;
+    if (!name || !match) return null;
     return { name, price: Number(match[0]) };
   }
 
