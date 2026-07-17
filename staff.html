@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="description" content="Ιδιωτικός πίνακας παραγγελιών προσωπικού More Than a Kiosk.">
-  <link rel="canonical" href="https://morethanakiosk.com/staff.html">
+  <link rel="canonical" href="https://alexzaxa.github.io/tester/staff.html">
   <title>Παραγγελίες προσωπικού | More Than a Kiosk</title>
   <link rel="icon" href="assets/icons/favicon.png" type="image/png">
   <link rel="stylesheet" href="css/styles.css">
@@ -27,6 +27,17 @@
         <label>Email<input data-login-email type="email" autocomplete="username" required></label>
         <label>Κωδικός<input data-login-password type="password" autocomplete="current-password" required></label>
         <button class="primary-button" type="submit">Σύνδεση</button>
+        <button class="text-button" data-reset-password type="button">Δεν έχω κωδικό / Ξέχασα τον κωδικό</button>
+      </form>
+    </section>
+
+    <section class="staff-login" data-password-panel hidden>
+      <h2>Ορισμός κωδικού</h2>
+      <p>Δημιούργησε τον κωδικό που θα χρησιμοποιείς για το προσωπικό.</p>
+      <form data-password-form>
+        <label>Νέος κωδικός<input data-new-password type="password" autocomplete="new-password" minlength="10" required></label>
+        <label>Επανάληψη κωδικού<input data-confirm-password type="password" autocomplete="new-password" minlength="10" required></label>
+        <button class="primary-button" type="submit">Αποθήκευση κωδικού</button>
       </form>
     </section>
 

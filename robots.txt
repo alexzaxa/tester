@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://morethanakiosk.com/sitemap.xml
+Sitemap: https://alexzaxa.github.io/tester/sitemap.xml

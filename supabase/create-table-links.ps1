@@ -1,6 +1,6 @@
 param(
   [ValidateRange(1,100)][int]$TableCount = 12,
-  [string]$SiteUrl = 'https://morethanakiosk.com/menu.html'
+  [string]$SiteUrl = 'https://alexzaxa.github.io/tester/menu.html'
 )
 $ErrorActionPreference = 'Stop'
 $rows = @()
